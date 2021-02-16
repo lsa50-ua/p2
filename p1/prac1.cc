@@ -78,6 +78,22 @@ void showMainMenu(){
 }
 
 void editProject(Project &toDoList){
+  cout << "Enter project name: ";
+  getline(cin,toDoList.name);
+  if (toDoList.name == "")
+  {
+    error(ERR_EMPTY);
+  }
+  else{
+    cout << "Enter project description: ";
+    getline(cin, toDoList.description);
+    cin.get();
+    if (toDoList.description == "")
+    {
+      error(ERR_EMPTY);
+    }
+  }
+  
 }
 
 void addList(Project &toDoList){
