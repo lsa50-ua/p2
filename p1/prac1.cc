@@ -78,25 +78,68 @@ void showMainMenu(){
 }
 
 void editProject(Project &toDoList){
-  cout << "Enter project name: ";
-  getline(cin,toDoList.name);
-  if (toDoList.name == "")
+  
+  do
   {
-    error(ERR_EMPTY);
-  }
-  else{
-    cout << "Enter project description: ";
-    getline(cin, toDoList.description);
-    cin.get();
-    if (toDoList.description == "")
+    cout << "Enter project name: ";
+    getline(cin,toDoList.name);
+    if (toDoList.name == "")
     {
       error(ERR_EMPTY);
     }
+    
+  } while (toDoList.name == "");
+  
+  cout << "Enter project description: ";
+  getline(cin, toDoList.description);
+  cin.get();
+
+  
+}
+int ComprobarNombresListas(Project toDoList, List nueva){
+  int pos, i;
+  pos = -1;
+  for (i = 0; i < toDoList.lists.size(); i++)
+  {
+    if (toDoList.lists[i].name == nueva.name)
+    {
+      pos = i;
+    }
+    
   }
+  return pos;
   
 }
 
 void addList(Project &toDoList){
+  List nueva;
+  int comprobacion;
+  comprobacion = ComprobarNombresListas(toDoList, nueva);
+  do
+  {
+    cout << "Enter list name: ";
+    getline(cin, nueva.name);
+    if (nueva.name == "")
+    {
+      error(ERR_EMPTY);
+    }
+    else
+    {
+      if (comprobacion != -1)
+      {
+        error(ERR_LIST_NAME);
+      }
+      else
+      {
+        toDoList.lists.push_back(nueva);
+      }
+      
+    }
+    
+  } while (nueva.name == "" || comprobacion != -1);
+  
+  
+  
 }
 
 void deleteList(Project &toDoList){
