@@ -96,12 +96,12 @@ void editProject(Project &toDoList){
 
   
 }
-int ComprobarNombresListas(Project toDoList, List nueva){
+int ComprobarNombresListas(Project toDoList, string nombre){
   int pos, i;
   pos = -1;
-  for (i = 0; i < toDoList.lists.size(); i++)
+  for (i = 0; i < (int) toDoList.lists.size(); i++)
   {
-    if (toDoList.lists[i].name == nueva.name)
+    if (toDoList.lists[i].name == nombre)
     {
       pos = i;
     }
@@ -114,7 +114,7 @@ int ComprobarNombresListas(Project toDoList, List nueva){
 void addList(Project &toDoList){
   List nueva;
   int comprobacion;
-  comprobacion = ComprobarNombresListas(toDoList, nueva);
+  
   do
   {
     cout << "Enter list name: ";
@@ -125,6 +125,7 @@ void addList(Project &toDoList){
     }
     else
     {
+      comprobacion = ComprobarNombresListas(toDoList, nueva.name);
       if (comprobacion != -1)
       {
         error(ERR_LIST_NAME);
