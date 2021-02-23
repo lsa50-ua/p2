@@ -103,7 +103,7 @@ void editProject(Project &toDoList){
 int ComprobarNombresListas(Project toDoList, string nombre){
   int pos, i;
   pos = -1;
-  for (i = 0; i < (int) toDoList.lists.size(); i++)
+  for (i = 0; i < (int) toDoList.lists.size() && pos == -1; i++)
   {
     if (toDoList.lists[i].name == nombre)
     {
@@ -168,7 +168,7 @@ bool ComprobarFecha(Date deadline){
     return false;
   }
 
-  if((deadline.year % 4 == 0 && deadline.year != 0) || deadline.year % 400 == 0){
+  if((deadline.year % 4 == 0 && deadline.year % 100 != 0) || deadline.year % 400 == 0){
     dias_mes[1]++;
   }
 
@@ -227,6 +227,7 @@ void addTask(Project &toDoList){
       }
       else
       {
+        newtask.isDone = false;
         toDoList.lists[comprobacionName].tasks.push_back(newtask);
       }
       
@@ -234,8 +235,48 @@ void addTask(Project &toDoList){
     
   }
 }
-
+int ComprobarTasks(Project toDoList, string nombre, int marcadorLista ){
+  int i, pos;
+  pos = -1;
+  for (i = 0; i < (int) toDoList.lists[marcadorLista].tasks.size() && pos == -1; i++)
+  {
+    if (nombre == toDoList.lists[marcadorLista].tasks[i].name)
+    {
+      pos = i;
+    }
+    
+  }
+  return pos;
+}
 void deleteTask(Project &toDoList){
+  string listname, taskname;
+  int comprobacionLista, comprobacionTask;
+  do
+  {  
+    cout << "Enter list name: ";
+    getline(cin, listname);
+    ComprobarCadenaVacia(listname);
+  } while (listname == "");
+  
+  comprobacionLista = ComprobarNombresListas(toDoList, listname);
+  if (comprobacionLista == -1)
+  {
+    error(ERR_LIST_NAME);
+  }
+  else{
+    cout << "Enter task name: ";
+    getline(cin, taskname);
+    comprobacionTask = ComprobarTasks(toDoList, taskname, comprobacionLista);
+    if (comprobacionTask == -1)
+    {
+      error(ERR_TASK_NAME);
+    }
+    else
+    {
+      toDoList.lists[comprobacionLista].tasks.erase(toDoList.lists[comprobacionLista].tasks.begin() + comprobacionTask);
+    }
+    
+  }
 }
 
 void toggleTask(Project &toDoList){
