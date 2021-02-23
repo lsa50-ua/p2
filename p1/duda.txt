@@ -1,0 +1,18 @@
+#include<...>
+namespace std;
+
+
+
+void Duda(int &);
+
+
+int main(){
+    Duda(duda);
+}
+
+
+void Duda(int & duda){
+    do{
+
+    }while;
+}
