@@ -1,12 +1,13 @@
 // DNI 48804855M SIMÓN ALBARRÁN, LUIS 
 
-
-
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 
 using namespace std;
+
+const int BORRAR = 1;
+const int TOGGLE = 2;
 
 struct Date{
   int day;
@@ -113,18 +114,20 @@ int ComprobarNombresListas(Project toDoList, string nombre){
   return pos;
   
 }
-
-void addList(Project &toDoList){
-  List nueva;
-  int comprobacion;
-  
+void IntroducirNombreLista(string &nombre){
   do
   {  
     cout << "Enter list name: ";
-    getline(cin, nueva.name);
-    ComprobarCadenaVacia(nueva.name);
-  } while (nueva.name == "");
-  
+    getline(cin, nombre);
+    ComprobarCadenaVacia(nombre);
+  } while (nombre == "");
+
+}
+
+void addList(Project &toDoList){
+  List nueva;
+  int comprobacion;  
+  IntroducirNombreLista(nueva.name);
   comprobacion = ComprobarNombresListas(toDoList, nueva.name);
   if (comprobacion != -1)
   {
@@ -140,13 +143,8 @@ void addList(Project &toDoList){
 void deleteList(Project &toDoList){
   string listname;
   int comprobacion;
-  do
-  {  
-    cout << "Enter list name: ";
-    getline(cin, listname);
-    ComprobarCadenaVacia(listname);
-  } while (listname == "");
   
+  IntroducirNombreLista(listname);
   comprobacion = ComprobarNombresListas(toDoList, listname);
   if (comprobacion == -1)
   {
@@ -191,13 +189,8 @@ void addTask(Project &toDoList){
   Task newtask;
   int comprobacionName;
   char simbolo;
-  do
-  {  
-    cout << "Enter list name: ";
-    getline(cin, listname);
-    ComprobarCadenaVacia(listname);
-  } while (listname == "");
   
+  IntroducirNombreLista(listname);
   comprobacionName = ComprobarNombresListas(toDoList, listname);
   if (comprobacionName == -1)
   {
@@ -210,7 +203,6 @@ void addTask(Project &toDoList){
     cout << "Enter deadline: ";
     cin >> newtask.deadline.day >> simbolo >> newtask.deadline.month >> simbolo >> newtask.deadline.year;
     cin.get();
-
     if (ComprobarFecha(newtask.deadline) == false)
     {
       error(ERR_DATE);
@@ -228,33 +220,38 @@ void addTask(Project &toDoList){
       {
         newtask.isDone = false;
         toDoList.lists[comprobacionName].tasks.push_back(newtask);
-      }
-      
-    }
-    
+      } 
+    } 
   }
 }
-void ComprobarYEliminarTasks(Project &toDoList, string nombre, int marcadorLista ){
-  int i, pos, veces;
-  bool repetido;
-  repetido = true;
+void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLista, int funcion){
+  int i, veces;
   veces = 0;
 
-  while (repetido == true)
-  {
-    repetido = false;
-    pos = -1;
-    for (i = 0; i < (int) toDoList.lists[marcadorLista].tasks.size() && pos == -1; i++)
+    for (i = 0; i < (int) toDoList.lists[marcadorLista].tasks.size(); i++)
     {
       if (nombre == toDoList.lists[marcadorLista].tasks[i].name)
       {
-        pos = i;
-        repetido = true;
         veces ++;
-        toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + pos);
+        if (funcion == 1)
+        {
+          toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + i);
+        }
+        else{
+          if (funcion == 2)
+          {
+            if (toDoList.lists[marcadorLista].tasks[i].isDone == false)
+            {
+              toDoList.lists[marcadorLista].tasks[i].isDone = true;
+            }
+            else
+            {
+              toDoList.lists[marcadorLista].tasks[i].isDone = false;
+            } 
+          }
+        }
       }
     }
-  }
   if (veces == 0)
   {
     error(ERR_TASK_NAME);
@@ -264,13 +261,8 @@ void ComprobarYEliminarTasks(Project &toDoList, string nombre, int marcadorLista
 void deleteTask(Project &toDoList){
   string listname, taskname;
   int comprobacionLista;
-  do
-  {  
-    cout << "Enter list name: ";
-    getline(cin, listname);
-    ComprobarCadenaVacia(listname);
-  } while (listname == "");
   
+  IntroducirNombreLista(listname);
   comprobacionLista = ComprobarNombresListas(toDoList, listname);
   if (comprobacionLista == -1)
   {
@@ -279,14 +271,131 @@ void deleteTask(Project &toDoList){
   else{
     cout << "Enter task name: ";
     getline(cin, taskname);
-    ComprobarYEliminarTasks(toDoList, taskname, comprobacionLista);
+    ComprobarYHacerFuncionTask(toDoList, taskname, comprobacionLista, BORRAR);
   }
 }
 
 void toggleTask(Project &toDoList){
+  int ComprobacionLista;
+  string listname, taskname;
+  IntroducirNombreLista(listname);
+  ComprobacionLista = ComprobarNombresListas(toDoList, listname);
+  if (ComprobacionLista == -1)
+  {
+    error(ERR_LIST_NAME);
+  }
+  else
+  {
+    cout << "Enter task name: ";
+    getline(cin, taskname);
+    ComprobarYHacerFuncionTask(toDoList, taskname, ComprobacionLista, TOGGLE);
+  }
+
+}
+char XTasks(const Project &toDoList, int i, int j){
+  int marcador;
+  if (toDoList.lists[i].tasks[j].isDone == true)
+  {
+    marcador = 'X';
+  }
+  else
+  {
+    marcador = ' ';
+  }
+  return marcador;
+}
+void ImprimirInformacionTareas(const Project &toDoList, int i, int j){
+  char marcador;
+  marcador = XTasks(toDoList, i, j);
+  cout << "[" << marcador << "] ";
+  cout << "(" << toDoList.lists[i].tasks[j].time << ") ";
+  cout << toDoList.lists[i].tasks[j].deadline.year << "-" << toDoList.lists[i].tasks[j].deadline.month << "-" << toDoList.lists[i].tasks[j].deadline.day;
+  cout << " : " << toDoList.lists[i].tasks[j].name << endl;
+}
+void HighestPriority(const Project &toDoList, int posi, int posj, int i, int j){
+  if (toDoList.lists[i].tasks[j].deadline.year < toDoList.lists[posi].tasks[posj].deadline.year)
+  {
+    posi = i;
+    posj = j;
+  }
+  else
+  {
+    if (toDoList.lists[i].tasks[j].deadline.year == toDoList.lists[posi].tasks[posj].deadline.year)
+    {
+      if (toDoList.lists[i].tasks[j].deadline.month < toDoList.lists[posi].tasks[posj].deadline.month)
+      {
+        posi = i;
+        posj = j;
+      }
+      else
+      {
+        if (toDoList.lists[i].tasks[j].deadline.month == toDoList.lists[posi].tasks[posj].deadline.month)
+        {
+          if (toDoList.lists[i].tasks[j].deadline.day < toDoList.lists[posi].tasks[posj].deadline.day)
+          {
+            posi = i;
+            posj = j;
+          } 
+        }
+      } 
+    } 
+  } 
+}
+void InformacionListas(const Project &toDoList){
+  int i, j, posi, posj, vecesPendientes, vecesHechas, totalLeft, totalDone;
+  char marcador;
+  totalLeft = 0;
+  totalDone = 0;
+  vecesHechas = 0;
+  vecesPendientes = 0;
+  for (i = 0; i < (int) toDoList.lists.size(); i++)
+  {
+    cout << toDoList.lists[i].name << endl;
+    for (j = 0; j < (int) toDoList.lists[i].tasks.size(); j++)
+    {
+      if (toDoList.lists[i].tasks[j].isDone == false)
+      {
+        ImprimirInformacionTareas(toDoList, i, j);
+        totalLeft = totalLeft + toDoList.lists[i].tasks[j].time;
+        vecesPendientes ++;
+        if (vecesPendientes == 1)
+        {
+          posi = i;
+          posj = j;
+        }
+        else
+        {
+          HighestPriority(toDoList, posi, posj, i, j);
+        }
+      }
+    }
+    for (j = 0; j < (int) toDoList.lists[i].tasks.size(); j++)
+    {
+      if (toDoList.lists[i].tasks[j].isDone == true)
+      {
+        ImprimirInformacionTareas(toDoList, i, j);
+        totalDone = totalDone + toDoList.lists[i].tasks[j].time;
+        vecesHechas ++;
+      }
+    }      
+  }
+  cout << "Total left: " << vecesPendientes << " (" << totalLeft << " minutes)" << endl;
+  cout << "Total done: " << vecesHechas << " (" << totalDone << " minutes)" << endl;
+  if (vecesPendientes > 0)
+  {
+    cout << "Highest priority: " << toDoList.lists[posi].tasks[posj].name;
+    cout << " (" << toDoList.lists[posi].tasks[posj].deadline.year << "-" << toDoList.lists[posi].tasks[posj].deadline.month;
+    cout << "-" << toDoList.lists[posi].tasks[posj].deadline.day << ")" << endl;
+  }
 }
 
 void report(const Project &toDoList){
+  cout << "Name: " << toDoList.name << endl;
+  if (toDoList.description != "")
+  {
+    cout << "Description: " << toDoList.description << endl;
+  }
+  InformacionListas(toDoList);
 }
 
 int main(){
@@ -322,4 +431,3 @@ int main(){
   return 0;    
 }
 
-// toDoList.lists.erase(toDoList.lists.begin() + pos)
