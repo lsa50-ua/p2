@@ -236,6 +236,7 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
         if (funcion == 1)
         {
           toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + i);
+          i--;
         }
         else{
           if (funcion == 2)
@@ -247,7 +248,8 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
             else
             {
               toDoList.lists[marcadorLista].tasks[i].isDone = false;
-            } 
+            }
+             
           }
         }
       }
@@ -312,7 +314,7 @@ void ImprimirInformacionTareas(const Project &toDoList, int i, int j){
   cout << toDoList.lists[i].tasks[j].deadline.year << "-" << toDoList.lists[i].tasks[j].deadline.month << "-" << toDoList.lists[i].tasks[j].deadline.day;
   cout << " : " << toDoList.lists[i].tasks[j].name << endl;
 }
-void HighestPriority(const Project &toDoList, int posi, int posj, int i, int j){
+void HighestPriority(const Project &toDoList, int &posi, int &posj, int i, int j){
   if (toDoList.lists[i].tasks[j].deadline.year < toDoList.lists[posi].tasks[posj].deadline.year)
   {
     posi = i;
@@ -343,7 +345,6 @@ void HighestPriority(const Project &toDoList, int posi, int posj, int i, int j){
 }
 void InformacionListas(const Project &toDoList){
   int i, j, posi, posj, vecesPendientes, vecesHechas, totalLeft, totalDone;
-  char marcador;
   totalLeft = 0;
   totalDone = 0;
   vecesHechas = 0;
