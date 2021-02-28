@@ -1,5 +1,4 @@
-// Luis Simón Albarrán
-// DNI: 48804855
+// DNI 48804855M SIMÓN ALBARRÁN, LUIS 
 
 
 
@@ -235,22 +234,36 @@ void addTask(Project &toDoList){
     
   }
 }
-int ComprobarTasks(Project toDoList, string nombre, int marcadorLista ){
-  int i, pos;
-  pos = -1;
-  for (i = 0; i < (int) toDoList.lists[marcadorLista].tasks.size() && pos == -1; i++)
+void ComprobarYEliminarTasks(Project &toDoList, string nombre, int marcadorLista ){
+  int i, pos, veces;
+  bool repetido;
+  repetido = true;
+  veces = 0;
+
+  while (repetido == true)
   {
-    if (nombre == toDoList.lists[marcadorLista].tasks[i].name)
+    repetido = false;
+    pos = -1;
+    for (i = 0; i < (int) toDoList.lists[marcadorLista].tasks.size() && pos == -1; i++)
     {
-      pos = i;
+      if (nombre == toDoList.lists[marcadorLista].tasks[i].name)
+      {
+        pos = i;
+        repetido = true;
+        veces ++;
+        toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + pos);
+      }
     }
-    
   }
-  return pos;
+  if (veces == 0)
+  {
+    error(ERR_TASK_NAME);
+  }
+  
 }
 void deleteTask(Project &toDoList){
   string listname, taskname;
-  int comprobacionLista, comprobacionTask;
+  int comprobacionLista;
   do
   {  
     cout << "Enter list name: ";
@@ -266,16 +279,7 @@ void deleteTask(Project &toDoList){
   else{
     cout << "Enter task name: ";
     getline(cin, taskname);
-    comprobacionTask = ComprobarTasks(toDoList, taskname, comprobacionLista);
-    if (comprobacionTask == -1)
-    {
-      error(ERR_TASK_NAME);
-    }
-    else
-    {
-      toDoList.lists[comprobacionLista].tasks.erase(toDoList.lists[comprobacionLista].tasks.begin() + comprobacionTask);
-    }
-    
+    ComprobarYEliminarTasks(toDoList, taskname, comprobacionLista);
   }
 }
 
