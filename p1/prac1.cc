@@ -233,13 +233,13 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
       if (nombre == toDoList.lists[marcadorLista].tasks[i].name)
       {
         veces ++;
-        if (funcion == 1)
+        if (funcion == BORRAR)
         {
           toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + i);
           i--;
         }
         else{
-          if (funcion == 2)
+          if (funcion == TOGGLE)
           {
             if (toDoList.lists[marcadorLista].tasks[i].isDone == false)
             {
