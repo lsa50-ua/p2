@@ -6,6 +6,10 @@
 
 using namespace std;
 
+const int MAXEXPECTEDTIME = 180;
+const int MINEXPECTEDTIME = 1;
+const int MAXYEAR = 2100;
+const int MINYEAR = 2000;
 const int BORRAR = 1;
 const int TOGGLE = 2;
 
@@ -158,11 +162,13 @@ void deleteList(Project &toDoList){
 }
 
 bool ComprobarFecha(Date deadline){
+  bool verificador;
+  verificador = true;
   int dias_mes[] = {31, 28, 31, 30,31, 30, 31, 31, 30, 31, 30, 31};
 
-  if (deadline.year < 2000 || deadline.year > 2100)
+  if (deadline.year < MINYEAR || deadline.year > MAXYEAR)
   {
-    return false;
+    verificador =  false;
   }
 
   if((deadline.year % 4 == 0 && deadline.year % 100 != 0) || deadline.year % 400 == 0){
@@ -171,16 +177,16 @@ bool ComprobarFecha(Date deadline){
 
   if (deadline.month < 1 || deadline.month > 12)
   {
-    return false;
+    verificador = false;
   }
 
   deadline.month --;
   if (deadline.day < 1 || deadline.day > dias_mes[deadline.month])
   {
-    return false;
+    verificador = false;
   }
 
-  return true;
+  return verificador;
     
 }
 
@@ -212,7 +218,7 @@ void addTask(Project &toDoList){
       cout << "Enter expected time: ";
       cin >> newtask.time;
       cin.get();
-      if (newtask.time < 1 || newtask.time > 180)
+      if (newtask.time < MINEXPECTEDTIME || newtask.time > MAXEXPECTEDTIME)
       {
         error(ERR_TIME);
       }
