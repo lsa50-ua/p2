@@ -242,7 +242,9 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
         if (funcion == BORRAR)
         {
           toDoList.lists[marcadorLista].tasks.erase(toDoList.lists[marcadorLista].tasks.begin() + i);
-          i--;
+          i--;          
+          /* El i-- sirve para cuando hay dos tareas con el mismo nombre seguidas, ya que se modifica el size del vector al borrar
+          y si no lo pusiera se saltaria la segunda.*/ 
         }
         else{
           if (funcion == TOGGLE)
@@ -365,15 +367,15 @@ void InformacionListas(const Project &toDoList){
         ImprimirInformacionTareas(toDoList, i, j);
         totalLeft = totalLeft + toDoList.lists[i].tasks[j].time;
         vecesPendientes ++;
-        if (vecesPendientes == 1)
+        if (vecesPendientes == 1)     //Coje la posicion de la primera tarea pendiente que encuentra, si la hay.
         {
           posi = i;
           posj = j;
         }
         else
         {
-          HighestPriority(toDoList, posi, posj, i, j);
-        }
+          HighestPriority(toDoList, posi, posj, i, j);  //Si hay mas de una tarea pendiente compara las fechas de la que va encontrando, 
+        }                                               //para encontrar la de mayor prioridad.
       }
     }
     for (j = 0; j < (int) toDoList.lists[i].tasks.size(); j++)
