@@ -8,6 +8,8 @@ using namespace std;
 
 const int MAXEXPECTEDTIME = 180;
 const int MINEXPECTEDTIME = 1;
+const int DICIEMBRE = 12;
+const int ENERO = 1;
 const int MAXYEAR = 2100;
 const int MINYEAR = 2000;
 const int BORRAR = 1;
@@ -171,20 +173,26 @@ bool ComprobarFecha(Date deadline){
     verificador =  false;
   }
 
-  if((deadline.year % 4 == 0 && deadline.year % 100 != 0) || deadline.year % 400 == 0){
+  if(verificador == true && ((deadline.year % 4 == 0 && deadline.year % 100 != 0) || deadline.year % 400 == 0)){
     dias_mes[1]++;
   }
 
-  if (deadline.month < 1 || deadline.month > 12)
+  if (verificador == true && (deadline.month < ENERO || deadline.month > DICIEMBRE))
   {
     verificador = false;
   }
-
-  deadline.month --;
-  if (deadline.day < 1 || deadline.day > dias_mes[deadline.month])
-  {
-    verificador = false;
+  else{
+    if (verificador == true)
+    {
+      deadline.month --;
+      if (deadline.day < 1 || deadline.day > dias_mes[deadline.month])
+      {
+        verificador = false;
+      }   
+    }
   }
+  
+  
 
   return verificador;
     
