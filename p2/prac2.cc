@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace std;
 
@@ -40,13 +41,23 @@ struct Project{
   vector<List> lists;
 };
 
+struct ToDo{
+int nextId;
+string name;
+vector<Project> projects;
+};
+
 enum Error{
   ERR_OPTION,
   ERR_EMPTY,
   ERR_LIST_NAME,
   ERR_TASK_NAME,
   ERR_DATE,
-  ERR_TIME
+  ERR_TIME,
+  ERR_ID,
+  ERR_PROJECT_NAME,
+  ERR_FILE,
+  ERR_ARGS
 };
 
 void error(Error e){
@@ -68,20 +79,21 @@ void error(Error e){
       break;
     case ERR_TIME:
       cout << "ERROR: wrong expected time" << endl;
+      break;
+    case ERR_ID:
+      cout << "ERROR: wrong project id" << endl;
+      break;
+    case ERR_PROJECT_NAME:
+      cout << "ERROR: wrong project name" << endl;
+      break;
+    case ERR_FILE:
+      cout << "ERROR: cannot open file" << endl;
+      break;
+    case ERR_ARGS:
+      cout << "ERROR: wrong arguments" << endl;
   }
 }
 
-void showMainMenu(){
-  cout << "1- Edit project" << endl
-       << "2- Add list" << endl
-       << "3- Delete list" << endl 
-       << "4- Add task" << endl
-       << "5- Delete task" << endl
-       << "6- Toggle task" << endl
-       << "7- Report" << endl
-       << "q- Quit" << endl
-       << "Option: ";
-}
 void ComprobarCadenaVacia(string name){
   
   if (name == "")
@@ -102,10 +114,9 @@ void editProject(Project &toDoList){
   
   cout << "Enter project description: ";
   getline(cin, toDoList.description);
-  
-
-  
+   
 }
+
 int ComprobarNombresListas(Project toDoList, string nombre){
   int pos, i;
   pos = -1;
@@ -192,8 +203,6 @@ bool ComprobarFecha(Date deadline){
     }
   }
   
-  
-
   return verificador;
     
 }
@@ -264,8 +273,7 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
             else
             {
               toDoList.lists[marcadorLista].tasks[i].isDone = false;
-            }
-             
+            }  
           }
         }
       }
@@ -273,9 +281,9 @@ void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLi
   if (veces == 0)
   {
     error(ERR_TASK_NAME);
-  }
-  
+  } 
 }
+
 void deleteTask(Project &toDoList){
   string listname, taskname;
   int comprobacionLista;
@@ -308,8 +316,8 @@ void toggleTask(Project &toDoList){
     getline(cin, taskname);
     ComprobarYHacerFuncionTask(toDoList, taskname, ComprobacionLista, TOGGLE);
   }
-
 }
+
 char XTasks(const Project &toDoList, int i, int j){
   int marcador;
   if (toDoList.lists[i].tasks[j].isDone == true)
@@ -322,6 +330,7 @@ char XTasks(const Project &toDoList, int i, int j){
   }
   return marcador;
 }
+
 void ImprimirInformacionTareas(const Project &toDoList, int i, int j){
   char marcador;
   marcador = XTasks(toDoList, i, j);
@@ -330,6 +339,7 @@ void ImprimirInformacionTareas(const Project &toDoList, int i, int j){
   cout << toDoList.lists[i].tasks[j].deadline.year << "-" << toDoList.lists[i].tasks[j].deadline.month << "-" << toDoList.lists[i].tasks[j].deadline.day;
   cout << " : " << toDoList.lists[i].tasks[j].name << endl;
 }
+
 void HighestPriority(const Project &toDoList, int &posi, int &posj, int i, int j){
   if (toDoList.lists[i].tasks[j].deadline.year < toDoList.lists[posi].tasks[posj].deadline.year)
   {
@@ -359,6 +369,7 @@ void HighestPriority(const Project &toDoList, int &posi, int &posj, int i, int j
     } 
   } 
 }
+
 void InformacionListas(const Project &toDoList){
   int i, j, posi, posj, vecesPendientes, vecesHechas, totalLeft, totalDone;
   totalLeft = 0;
@@ -415,9 +426,84 @@ void report(const Project &toDoList){
   InformacionListas(toDoList);
 }
 
+void showProjectMenu(){
+  cout << "1- Edit project" << endl
+       << "2- Add list" << endl
+       << "3- Delete list" << endl 
+       << "4- Add task" << endl
+       << "5- Delete task" << endl
+       << "6- Toggle task" << endl
+       << "7- Report" << endl
+       << "b- Back to main menu" << endl
+       << "Option: ";
+}
+
+void ProjectMenu(ToDo &ProjectManagement){
+  char option;
+  int pos, i, id;
+  pos = -1;
+
+  cout << "Enter project id: ";
+  cin >> id;
+  cin.get();
+
+  for (i = 0; i < (int) ProjectManagement.projects.size(); i++)
+  {
+    if (ProjectManagement.projects[i].id == id)
+    {
+      pos = i;
+    }
+  }
+  if (pos == -1)
+  {
+    error(ERR_ID);
+  }
+  else
+  {
+    do
+    {
+      showProjectMenu();
+      cin >> option;
+      cin.get();
+      switch(option){
+        case '1': editProject(ProjectManagement.projects[id]);
+                  break;
+        case '2': addList(ProjectManagement.projects[id]);
+                  break;
+        case '3': deleteList(ProjectManagement.projects[id]);
+                  break;
+        case '4': addTask(ProjectManagement.projects[id]);
+                  break;
+        case '5': deleteTask(ProjectManagement.projects[id]);
+                  break;
+        case '6': toggleTask(ProjectManagement.projects[id]);
+                  break;
+        case '7': report(ProjectManagement.projects[id]);
+                  break;
+        case 'b': break;
+        default: error(ERR_OPTION);
+      }  
+    }while(option != 'b');    
+  } 
+}
+
+void showMainMenu(){
+  cout << "1- Project menu" << endl
+       << "2- Add project" << endl
+       << "3- Delete project" << endl 
+       << "4- Import projects" << endl
+       << "5- Export projects" << endl
+       << "6- Load data" << endl
+       << "7- Save data" << endl
+       << "8- Summary" << endl
+       << "q- Quit" << endl
+       << "Option: ";
+}
+
 int main(){
-  Project toDoList;
-  toDoList.id=1;
+  ToDo ProjectManagement;
+  ProjectManagement.name = "My ToDo list";
+  ProjectManagement.nextId = 1;
   char option;
   
   do{
@@ -426,19 +512,21 @@ int main(){
     cin.get();
     
     switch(option){
-      case '1': editProject(toDoList);
+      case '1': ProjectMenu(ProjectManagement);
                 break;
-      case '2': addList(toDoList);
+      case '2': 
                 break;
-      case '3': deleteList(toDoList);
+      case '3': 
                 break;
-      case '4': addTask(toDoList);
+      case '4': 
                 break;
-      case '5': deleteTask(toDoList);
+      case '5': 
                 break;
-      case '6': toggleTask(toDoList);
+      case '6': 
                 break;
-      case '7': report(toDoList);
+      case '7': 
+                break;
+      case '8':
                 break;
       case 'q': break;
       default: error(ERR_OPTION);
