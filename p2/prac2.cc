@@ -438,22 +438,30 @@ void showProjectMenu(){
        << "Option: ";
 }
 
-void ProjectMenu(ToDo &ProjectManagement){
-  char option;
-  int pos, i, id;
+int PedirYComprobarId(const vector<Project> &projects){
+  int id, pos, i;
   pos = -1;
 
   cout << "Enter project id: ";
   cin >> id;
   cin.get();
 
-  for (i = 0; i < (int) ProjectManagement.projects.size(); i++)
+  for (i = 0; i < (int) projects.size() && pos == -1; i++)
   {
-    if (ProjectManagement.projects[i].id == id)
+    if (projects[i].id == id)
     {
       pos = i;
     }
   }
+
+  return pos;
+}
+
+void ProjectMenu(ToDo &ProjectManagement){
+  char option;
+  int pos;
+
+  pos = PedirYComprobarId(ProjectManagement.projects);
   if (pos == -1)
   {
     error(ERR_ID);
@@ -466,25 +474,61 @@ void ProjectMenu(ToDo &ProjectManagement){
       cin >> option;
       cin.get();
       switch(option){
-        case '1': editProject(ProjectManagement.projects[id]);
+        case '1': editProject(ProjectManagement.projects[pos]);
                   break;
-        case '2': addList(ProjectManagement.projects[id]);
+        case '2': addList(ProjectManagement.projects[pos]);
                   break;
-        case '3': deleteList(ProjectManagement.projects[id]);
+        case '3': deleteList(ProjectManagement.projects[pos]);
                   break;
-        case '4': addTask(ProjectManagement.projects[id]);
+        case '4': addTask(ProjectManagement.projects[pos]);
                   break;
-        case '5': deleteTask(ProjectManagement.projects[id]);
+        case '5': deleteTask(ProjectManagement.projects[pos]);
                   break;
-        case '6': toggleTask(ProjectManagement.projects[id]);
+        case '6': toggleTask(ProjectManagement.projects[pos]);
                   break;
-        case '7': report(ProjectManagement.projects[id]);
+        case '7': report(ProjectManagement.projects[pos]);
                   break;
         case 'b': break;
         default: error(ERR_OPTION);
       }  
     }while(option != 'b');    
   } 
+}
+
+int ComprobarNombreProyecto(const vector<Project> &projects, string name){
+  int i, pos;
+  pos = -1;
+  for (i = 0; i < (int) projects.size() && pos == -1; i++)
+  {
+    if (projects[i].name == name)
+    {
+      pos = i;
+    }
+  }
+  return pos;
+}
+
+void addProject(ToDo &ProjectManagement){
+  Project nuevo;
+  do
+  {
+    cout << "Enter project name: ";
+    getline(cin, nuevo.name);
+    ComprobarCadenaVacia(nuevo.name);   
+  } while (nuevo.name == "");
+  
+  if (ComprobarNombreProyecto(ProjectManagement.projects, nuevo.name) != -1)
+  {
+    error(ERR_PROJECT_NAME);
+  }
+  else
+  {
+    cout << "Enter project description: ";
+    getline(cin, nuevo.description);
+    nuevo.id = ProjectManagement.nextId;
+    ProjectManagement.projects.push_back(nuevo);
+    ProjectManagement.nextId ++;
+  }
 }
 
 void showMainMenu(){
@@ -514,7 +558,7 @@ int main(){
     switch(option){
       case '1': ProjectMenu(ProjectManagement);
                 break;
-      case '2': 
+      case '2': addProject(ProjectManagement);
                 break;
       case '3': 
                 break;
