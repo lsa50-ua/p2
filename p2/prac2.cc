@@ -94,17 +94,14 @@ void error(Error e){
   }
 }
 
-void ComprobarCadenaVacia(string name){
-  
+void ComprobarCadenaVacia(string name){ 
   if (name == "")
   {
     error(ERR_EMPTY);
   }
-
 }
 
 void editProject(Project &toDoList){
-  
   do
   {
     cout << "Enter project name: ";
@@ -114,7 +111,6 @@ void editProject(Project &toDoList){
   
   cout << "Enter project description: ";
   getline(cin, toDoList.description);
-   
 }
 
 int ComprobarNombresListas(Project toDoList, string nombre){
@@ -129,8 +125,8 @@ int ComprobarNombresListas(Project toDoList, string nombre){
     
   }
   return pos;
-  
 }
+
 void IntroducirNombreLista(string &nombre){
   do
   {  
@@ -138,12 +134,12 @@ void IntroducirNombreLista(string &nombre){
     getline(cin, nombre);
     ComprobarCadenaVacia(nombre);
   } while (nombre == "");
-
 }
 
 void addList(Project &toDoList){
   List nueva;
-  int comprobacion;  
+  int comprobacion; 
+
   IntroducirNombreLista(nueva.name);
   comprobacion = ComprobarNombresListas(toDoList, nueva.name);
   if (comprobacion != -1)
@@ -153,8 +149,7 @@ void addList(Project &toDoList){
   else
   {
     toDoList.lists.push_back(nueva);
-  }
-      
+  }    
 }
 
 void deleteList(Project &toDoList){
@@ -171,7 +166,6 @@ void deleteList(Project &toDoList){
   {
     toDoList.lists.erase(toDoList.lists.begin() + comprobacion);
   }
-  
 }
 
 bool ComprobarFecha(Date deadline){
@@ -204,7 +198,6 @@ bool ComprobarFecha(Date deadline){
   }
   
   return verificador;
-    
 }
 
 void addTask(Project &toDoList){
@@ -247,6 +240,7 @@ void addTask(Project &toDoList){
     } 
   }
 }
+
 void ComprobarYHacerFuncionTask(Project &toDoList, string nombre, int marcadorLista, int funcion){
   int i, veces;
   veces = 0;
@@ -304,6 +298,7 @@ void deleteTask(Project &toDoList){
 void toggleTask(Project &toDoList){
   int ComprobacionLista;
   string listname, taskname;
+
   IntroducirNombreLista(listname);
   ComprobacionLista = ComprobarNombresListas(toDoList, listname);
   if (ComprobacionLista == -1)
@@ -320,6 +315,7 @@ void toggleTask(Project &toDoList){
 
 char XTasks(const Project &toDoList, int i, int j){
   int marcador;
+
   if (toDoList.lists[i].tasks[j].isDone == true)
   {
     marcador = 'X';
@@ -334,6 +330,7 @@ char XTasks(const Project &toDoList, int i, int j){
 void ImprimirInformacionTareas(const Project &toDoList, int i, int j){
   char marcador;
   marcador = XTasks(toDoList, i, j);
+
   cout << "[" << marcador << "] ";
   cout << "(" << toDoList.lists[i].tasks[j].time << ") ";
   cout << toDoList.lists[i].tasks[j].deadline.year << "-" << toDoList.lists[i].tasks[j].deadline.month << "-" << toDoList.lists[i].tasks[j].deadline.day;
@@ -376,6 +373,7 @@ void InformacionListas(const Project &toDoList){
   totalDone = 0;
   vecesHechas = 0;
   vecesPendientes = 0;
+
   for (i = 0; i < (int) toDoList.lists.size(); i++)
   {
     cout << toDoList.lists[i].name << endl;
@@ -419,10 +417,12 @@ void InformacionListas(const Project &toDoList){
 
 void report(const Project &toDoList){
   cout << "Name: " << toDoList.name << endl;
+
   if (toDoList.description != "")
   {
     cout << "Description: " << toDoList.description << endl;
   }
+
   InformacionListas(toDoList);
 }
 
@@ -531,6 +531,20 @@ void addProject(ToDo &ProjectManagement){
   }
 }
 
+void removeProject(ToDo &ProjectManagement){
+  int pos;
+  pos = PedirYComprobarId(ProjectManagement.projects);
+
+  if (pos == -1)
+  {
+    error(ERR_ID);
+  }
+  else
+  {
+    ProjectManagement.projects.erase(ProjectManagement.projects.begin() + pos);
+  } 
+}
+
 void showMainMenu(){
   cout << "1- Project menu" << endl
        << "2- Add project" << endl
@@ -560,7 +574,7 @@ int main(){
                 break;
       case '2': addProject(ProjectManagement);
                 break;
-      case '3': 
+      case '3': removeProject(ProjectManagement);
                 break;
       case '4': 
                 break;
