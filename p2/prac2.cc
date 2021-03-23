@@ -531,7 +531,7 @@ void addProject(ToDo &ProjectManagement){
   }
 }
 
-void removeProject(ToDo &ProjectManagement){
+void deleteProject(ToDo &ProjectManagement){
   int pos;
   pos = PedirYComprobarId(ProjectManagement.projects);
 
@@ -543,6 +543,26 @@ void removeProject(ToDo &ProjectManagement){
   {
     ProjectManagement.projects.erase(ProjectManagement.projects.begin() + pos);
   } 
+}
+
+void exportOne(ToDo &ProjectManagement){
+
+}
+
+void exportProjects(ToDo &ProjectManagement){
+  char respuesta;
+  int pos;
+  do
+  {
+    cout << "Save all projects [Y/N]?: ";
+    cin >> respuesta;
+  } while (respuesta != 'n' || respuesta != 'N' || respuesta != 'y' || respuesta != 'Y');
+  if (respuesta == 'n' || respuesta == 'N')
+  {
+    
+  }
+  
+  
 }
 
 void showMainMenu(){
@@ -574,7 +594,7 @@ int main(){
                 break;
       case '2': addProject(ProjectManagement);
                 break;
-      case '3': removeProject(ProjectManagement);
+      case '3': deleteProject(ProjectManagement);
                 break;
       case '4': 
                 break;
