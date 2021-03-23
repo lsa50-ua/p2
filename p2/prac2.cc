@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -466,7 +467,7 @@ void ProjectMenu(ToDo &ProjectManagement){
   {
     error(ERR_ID);
   }
-  else
+  if(pos != -1)
   {
     do
     {
@@ -546,7 +547,42 @@ void deleteProject(ToDo &ProjectManagement){
 }
 
 void exportOne(ToDo &ProjectManagement){
+  int pos;
+  ofstream fichero;
+  char nombre[100];
+  pos = PedirYComprobarId(ProjectManagement.projects);
+  if (pos == -1)
+  {
+    error(ERR_ID);
+  }
+  else
+  {
+    cout << "Enter filename: ";
+    cin.getline(nombre, 100);
+    fichero.open(nombre);
+    if (fichero.is_open() == false)
+    {
+      error(ERR_FILE);
+    }
+    else
+    {
+      fichero << "<" << endl;
+      fichero << "#" << ProjectManagement.projects[pos].name << endl;
+      
+      if (ProjectManagement.projects[pos].description != "")
+      {
+        fichero << "*" << ProjectManagement.projects[pos].description << endl;
+      }
 
+      
+
+    }
+    
+    
+    
+  }
+  
+  
 }
 
 void exportProjects(ToDo &ProjectManagement){
@@ -559,7 +595,7 @@ void exportProjects(ToDo &ProjectManagement){
   } while (respuesta != 'n' || respuesta != 'N' || respuesta != 'y' || respuesta != 'Y');
   if (respuesta == 'n' || respuesta == 'N')
   {
-    
+    exportOne(ProjectManagement);
   }
   
   
