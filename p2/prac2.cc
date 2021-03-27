@@ -446,7 +446,6 @@ int PedirYComprobarId(const vector<Project> &projects){
   cout << "Enter project id: ";
   cin >> id;
   cin.get();
-
   for (i = 0; i < (int) projects.size() && pos == -1; i++)
   {
     if (projects[i].id == id)
@@ -546,8 +545,32 @@ void deleteProject(ToDo &ProjectManagement){
   } 
 }
 
-void exportOne(ToDo &ProjectManagement){
-  int pos;
+char imprimirIsDone(bool hecho){
+  char estado;
+  if (hecho == true)
+  {
+    estado = 'T';
+  }
+  else
+  {
+    estado = 'F';
+  }
+  return estado;
+}
+
+void exportarTareas(Task tareas, ofstream &fichero){
+  char estado;
+  estado = imprimirIsDone(tareas.isDone);
+  fichero << tareas.name << "|";
+  fichero << tareas.deadline.day << "/";
+  fichero << tareas.deadline.month;
+  fichero << "/" << tareas.deadline.year;
+  fichero << "|" << estado;
+  fichero << "|" << tareas.time << endl;
+}
+
+void exportOne(const ToDo &ProjectManagement){
+  int pos, i, j;
   ofstream fichero;
   char nombre[100];
   pos = PedirYComprobarId(ProjectManagement.projects);
@@ -573,26 +596,27 @@ void exportOne(ToDo &ProjectManagement){
       {
         fichero << "*" << ProjectManagement.projects[pos].description << endl;
       }
-
-      
-
-    }
-    
-    
-    
+      for (i = 0; i < (int) ProjectManagement.projects[pos].lists.size(); i++)
+      {
+        fichero << "@" << ProjectManagement.projects[pos].lists[i].name << endl;
+        for (j = 0; j < (int) ProjectManagement.projects[pos].lists[i].tasks.size(); j++)
+        {
+          exportarTareas(ProjectManagement.projects[pos].lists[i].tasks[j], fichero);
+        }
+      }
+      fichero << ">" << endl;
+    } 
   }
-  
-  
 }
 
 void exportProjects(ToDo &ProjectManagement){
   char respuesta;
-  int pos;
+  
   do
   {
     cout << "Save all projects [Y/N]?: ";
     cin >> respuesta;
-  } while (respuesta != 'n' || respuesta != 'N' || respuesta != 'y' || respuesta != 'Y');
+  } while (respuesta != 'n' && respuesta != 'N' && respuesta != 'y' && respuesta != 'Y');
   if (respuesta == 'n' || respuesta == 'N')
   {
     exportOne(ProjectManagement);
@@ -634,7 +658,7 @@ int main(){
                 break;
       case '4': 
                 break;
-      case '5': 
+      case '5': exportProjects(ProjectManagement);
                 break;
       case '6': 
                 break;
