@@ -178,11 +178,9 @@ bool ComprobarFecha(Date deadline){
   {
     verificador =  false;
   }
-
   if(verificador == true && ((deadline.year % 4 == 0 && deadline.year % 100 != 0) || deadline.year % 400 == 0)){
     dias_mes[1]++;
   }
-
   if (verificador == true && (deadline.month < ENERO || deadline.month > DICIEMBRE))
   {
     verificador = false;
@@ -197,7 +195,6 @@ bool ComprobarFecha(Date deadline){
       }   
     }
   }
-  
   return verificador;
 }
 
@@ -453,7 +450,6 @@ int PedirYComprobarId(const vector<Project> &projects){
       pos = i;
     }
   }
-
   return pos;
 }
 
@@ -569,10 +565,38 @@ void exportarTareas(Task tareas, ofstream &fichero){
   fichero << "|" << tareas.time << endl;
 }
 
-void exportOne(const ToDo &ProjectManagement){
-  int pos, i, j;
-  ofstream fichero;
+void exportarProyecto(Project proyecto, ofstream &fichero){
+  int i, j;
+  i = 0;
+  j = 0;
+
+  fichero << "<" << endl;
+  fichero << "#" << proyecto.name << endl;     
+  if (proyecto.description != "")
+  {
+   fichero << "*" << proyecto.description << endl;
+  }
+  for (i = 0; i < (int) proyecto.lists.size(); i++)
+  {
+    fichero << "@" << proyecto.lists[i].name << endl;
+    for (j = 0; j < (int) proyecto.lists[i].tasks.size(); j++)
+    {
+      exportarTareas(proyecto.lists[i].tasks[j], fichero);
+    }
+  }
+  fichero << ">" << endl;  
+}
+
+void pedirNombreFichero(ofstream &fichero){
   char nombre[100];
+  cout << "Enter filename: ";
+  cin.getline(nombre, 100);
+  fichero.open(nombre);
+}
+
+void exportOne(const ToDo &ProjectManagement){
+  int pos;
+  ofstream fichero;
   pos = PedirYComprobarId(ProjectManagement.projects);
   if (pos == -1)
   {
@@ -580,33 +604,33 @@ void exportOne(const ToDo &ProjectManagement){
   }
   else
   {
-    cout << "Enter filename: ";
-    cin.getline(nombre, 100);
-    fichero.open(nombre);
+    pedirNombreFichero(fichero);
     if (fichero.is_open() == false)
     {
       error(ERR_FILE);
     }
     else
     {
-      fichero << "<" << endl;
-      fichero << "#" << ProjectManagement.projects[pos].name << endl;
-      
-      if (ProjectManagement.projects[pos].description != "")
-      {
-        fichero << "*" << ProjectManagement.projects[pos].description << endl;
-      }
-      for (i = 0; i < (int) ProjectManagement.projects[pos].lists.size(); i++)
-      {
-        fichero << "@" << ProjectManagement.projects[pos].lists[i].name << endl;
-        for (j = 0; j < (int) ProjectManagement.projects[pos].lists[i].tasks.size(); j++)
-        {
-          exportarTareas(ProjectManagement.projects[pos].lists[i].tasks[j], fichero);
-        }
-      }
-      fichero << ">" << endl;
+      exportarProyecto(ProjectManagement.projects[pos], fichero);
     } 
   }
+}
+
+void exportarTodos(const vector<Project> &projects){
+  int i;
+  ofstream fichero;
+  pedirNombreFichero(fichero);
+  if (fichero.is_open() == false)
+  {
+    error(ERR_FILE);
+  }
+  else
+  {
+    for (i = 0; i < (int) projects.size(); i++)
+    {
+      exportarProyecto(projects[i], fichero);
+    }
+  } 
 }
 
 void exportProjects(ToDo &ProjectManagement){
@@ -616,13 +640,43 @@ void exportProjects(ToDo &ProjectManagement){
   {
     cout << "Save all projects [Y/N]?: ";
     cin >> respuesta;
+    cin.get();
   } while (respuesta != 'n' && respuesta != 'N' && respuesta != 'y' && respuesta != 'Y');
   if (respuesta == 'n' || respuesta == 'N')
   {
     exportOne(ProjectManagement);
   }
-  
-  
+  else
+  {
+    exportarTodos(ProjectManagement.projects);
+  }
+}
+
+void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHechas){
+  int i, j;
+  tareasTotales = 0;
+  tareasHechas = 0;
+  for (i = 0; i < (int) lists.size(); i++)
+  {
+    for (j = 0; j < (int) lists[i].tasks.size(); j++)
+    {
+      tareasTotales ++;
+      if (lists[i].tasks[j].isDone == true)
+      {
+        tareasHechas ++;
+      }
+    } 
+  }
+}
+
+void summary(const vector<Project> &projects){
+  int i, totalTasks, tasksDone;
+  for (i = 0; i < (int) projects.size(); i++)
+  {
+    cout << "(" << projects[i].id << ") " << projects[i].name;
+    contarTareas(projects[i].lists, totalTasks, tasksDone);
+    cout << " [" << tasksDone << "/" << totalTasks << "]" << endl;
+  }
 }
 
 void showMainMenu(){
@@ -664,7 +718,7 @@ int main(){
                 break;
       case '7': 
                 break;
-      case '8':
+      case '8': summary(ProjectManagement.projects);
                 break;
       case 'q': break;
       default: error(ERR_OPTION);
