@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include <algorithm>
+#include <sstream>
 #include <fstream>
 
 using namespace std;
@@ -415,12 +415,10 @@ void InformacionListas(const Project &toDoList){
 
 void report(const Project &toDoList){
   cout << "Name: " << toDoList.name << endl;
-
   if (toDoList.description != "")
   {
     cout << "Description: " << toDoList.description << endl;
   }
-
   InformacionListas(toDoList);
 }
 
@@ -493,6 +491,7 @@ void ProjectMenu(ToDo &ProjectManagement){
 
 int ComprobarNombreProyecto(const vector<Project> &projects, string name){
   int i, pos;
+
   pos = -1;
   for (i = 0; i < (int) projects.size() && pos == -1; i++)
   {
@@ -506,6 +505,7 @@ int ComprobarNombreProyecto(const vector<Project> &projects, string name){
 
 void addProject(ToDo &ProjectManagement){
   Project nuevo;
+
   do
   {
     cout << "Enter project name: ";
@@ -543,6 +543,7 @@ void deleteProject(ToDo &ProjectManagement){
 
 char imprimirIsDone(bool hecho){
   char estado;
+
   if (hecho == true)
   {
     estado = 'T';
@@ -556,6 +557,7 @@ char imprimirIsDone(bool hecho){
 
 void exportarTareas(Task tareas, ofstream &fichero){
   char estado;
+
   estado = imprimirIsDone(tareas.isDone);
   fichero << tareas.name << "|";
   fichero << tareas.deadline.day << "/";
@@ -587,16 +589,18 @@ void exportarProyecto(Project proyecto, ofstream &fichero){
   fichero << ">" << endl;  
 }
 
-void pedirNombreFichero(ofstream &fichero){
-  char nombre[100];
+void pedirNombreFicheroExp(ofstream &fichero){
+  string nombre;
+
   cout << "Enter filename: ";
-  cin.getline(nombre, 100);
-  fichero.open(nombre);
+  getline(cin, nombre);
+  fichero.open(nombre.c_str());
 }
 
 void exportOne(const ToDo &ProjectManagement){
   int pos;
   ofstream fichero;
+
   pos = PedirYComprobarId(ProjectManagement.projects);
   if (pos == -1)
   {
@@ -604,7 +608,7 @@ void exportOne(const ToDo &ProjectManagement){
   }
   else
   {
-    pedirNombreFichero(fichero);
+    pedirNombreFicheroExp(fichero);
     if (fichero.is_open() == false)
     {
       error(ERR_FILE);
@@ -619,7 +623,8 @@ void exportOne(const ToDo &ProjectManagement){
 void exportarTodos(const vector<Project> &projects){
   int i;
   ofstream fichero;
-  pedirNombreFichero(fichero);
+
+  pedirNombreFicheroExp(fichero);
   if (fichero.is_open() == false)
   {
     error(ERR_FILE);
@@ -656,6 +661,7 @@ void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHech
   int i, j;
   tareasTotales = 0;
   tareasHechas = 0;
+
   for (i = 0; i < (int) lists.size(); i++)
   {
     for (j = 0; j < (int) lists[i].tasks.size(); j++)
@@ -665,12 +671,121 @@ void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHech
       {
         tareasHechas ++;
       }
-    } 
+    }
+  }
+}
+
+void pedirNombreFicheroImp(ifstream &fichero){
+  string nombre;
+
+  cout << "Enter filename: ";
+  getline(cin, nombre);
+  fichero.open(nombre.c_str());
+}
+
+bool leerTareaFichero(string linea, Task &tarea){
+  char separador, isDone;
+  bool verificador = false;
+  stringstream bufferear(linea);
+
+  getline(bufferear, tarea.name, '|');
+  bufferear >> tarea.deadline.day >> separador
+            >> tarea.deadline.month >> separador >> tarea.deadline.year 
+            >> separador >> isDone >> separador >> tarea.time;
+  if (isDone == 'T')
+  {
+    tarea.isDone = true;
+  }
+  else
+  {
+    tarea.isDone = false;
+  }
+  if (ComprobarFecha(tarea.deadline) == false)
+  {
+    error(ERR_DATE);
+  }
+  else
+  {
+    if (tarea.time < MINEXPECTEDTIME || tarea.time > MAXEXPECTEDTIME)
+    {
+      error(ERR_TIME);
+    }
+    else
+    {
+      verificador = true;
+    }
+  }
+  return verificador;
+}
+
+void importProjects(ToDo &ProjectManagament){
+  ifstream fichero;
+  string linea, name, description;
+  Project project;
+  List list;
+  Task task;
+
+  pedirNombreFicheroImp(fichero);
+  if (fichero.is_open() == false)
+  {
+    error(ERR_FILE);
+  }
+  else
+  {
+    while(getline(fichero, linea)){
+      project.lists.clear();
+      getline(fichero, name);
+      name.erase(name.begin());
+      getline(fichero, linea);
+      if(linea[0] == '*')
+      {
+        linea.erase(linea.begin());
+        description = linea;
+        getline(fichero, linea);
+      }
+      else
+      {
+        description = "";
+      }
+      if (linea[0] != '>')
+      {
+        while (linea[0] == '@')
+        {
+          list.tasks.clear();
+          list.name = linea;
+          list.name.erase(list.name.begin());
+          getline(fichero, linea);
+          while (linea[0] != '>' && linea[0] != '@')
+          {
+            if(leerTareaFichero(linea, task) == true)
+            {
+              list.tasks.push_back(task);
+            }
+            getline(fichero, linea);
+          }
+          project.lists.push_back(list);
+        } 
+      }
+      if (ComprobarNombreProyecto(ProjectManagament.projects, name) != -1)
+      {
+        error(ERR_PROJECT_NAME);
+      }
+      else
+      {
+        project.name = name;
+        project.description = description;
+        project.id = ProjectManagament.nextId;
+        ProjectManagament.nextId ++;
+        ProjectManagament.projects.push_back(project);
+      }
+    }
+    fichero.close();
   }
 }
 
 void summary(const vector<Project> &projects){
   int i, totalTasks, tasksDone;
+
   for (i = 0; i < (int) projects.size(); i++)
   {
     cout << "(" << projects[i].id << ") " << projects[i].name;
@@ -710,7 +825,7 @@ int main(){
                 break;
       case '3': deleteProject(ProjectManagement);
                 break;
-      case '4': 
+      case '4': importProjects(ProjectManagement);
                 break;
       case '5': exportProjects(ProjectManagement);
                 break;
