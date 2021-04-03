@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <sstream>
 #include <fstream>
+#include <cstring>
+#include <cctype>
 
 using namespace std;
 
@@ -16,6 +18,8 @@ const int MAXYEAR = 2100;
 const int MINYEAR = 2000;
 const int BORRAR = 1;
 const int TOGGLE = 2;
+const int KMAXNAME = 20;
+const int KMAXDESC = 40;
 
 struct Date{
   int day;
@@ -46,6 +50,29 @@ struct ToDo{
 int nextId;
 string name;
 vector<Project> projects;
+};
+
+struct BinTask{
+char name[KMAXNAME];
+Date deadline;
+bool isDone;
+int time;
+};
+
+struct BinList{
+char name[KMAXNAME];
+unsigned numTasks;
+};
+
+struct BinProject{
+char name[KMAXNAME];
+char description[KMAXDESC];
+unsigned numLists;
+};
+
+struct BinToDo{
+char name[KMAXNAME];
+unsigned numProjects;
 };
 
 enum Error{
@@ -541,7 +568,7 @@ void deleteProject(ToDo &ProjectManagement){
   } 
 }
 
-char imprimirIsDone(bool hecho){
+char imprimirIsDone(bool hecho){  
   char estado;
 
   if (hecho == true)
@@ -555,7 +582,7 @@ char imprimirIsDone(bool hecho){
   return estado;
 }
 
-void exportarTareas(Task tareas, ofstream &fichero){
+void exportarTareas(Task tareas, ofstream &fichero){  // funcion que complementa a exportarProyecto, para escribir tareas
   char estado;
 
   estado = imprimirIsDone(tareas.isDone);
@@ -567,7 +594,7 @@ void exportarTareas(Task tareas, ofstream &fichero){
   fichero << "|" << tareas.time << endl;
 }
 
-void exportarProyecto(Project proyecto, ofstream &fichero){
+void exportarProyecto(Project proyecto, ofstream &fichero){ // funcion que escribe el proyecto seleccionado en el formato pedido a fichero
   int i, j;
   i = 0;
   j = 0;
@@ -589,16 +616,18 @@ void exportarProyecto(Project proyecto, ofstream &fichero){
   fichero << ">" << endl;  
 }
 
-void pedirNombreFicheroExp(ofstream &fichero){
+string pedirNombreFichero(){
   string nombre;
 
   cout << "Enter filename: ";
   getline(cin, nombre);
-  fichero.open(nombre.c_str());
+  
+  return nombre;
 }
 
-void exportOne(const ToDo &ProjectManagement){
+void exportOne(const ToDo &ProjectManagement){  // funcion que exporta, pidiendo el id del proyecto, un proyecto a un fichero llamando a la funcion exportarProyecto
   int pos;
+  string nombreFich;
   ofstream fichero;
 
   pos = PedirYComprobarId(ProjectManagement.projects);
@@ -608,7 +637,8 @@ void exportOne(const ToDo &ProjectManagement){
   }
   else
   {
-    pedirNombreFicheroExp(fichero);
+    nombreFich = pedirNombreFichero();
+    fichero.open(nombreFich.c_str());
     if (fichero.is_open() == false)
     {
       error(ERR_FILE);
@@ -616,15 +646,18 @@ void exportOne(const ToDo &ProjectManagement){
     else
     {
       exportarProyecto(ProjectManagement.projects[pos], fichero);
+      fichero.close();
     } 
   }
 }
 
-void exportarTodos(const vector<Project> &projects){
+void exportarTodos(const vector<Project> &projects){  // funcion que exporta todos los proyectos del programa a un fichero, llamando dentro de un bucle a la funcion exportarProyecto
   int i;
+  string nombreFich;
   ofstream fichero;
 
-  pedirNombreFicheroExp(fichero);
+  nombreFich = pedirNombreFichero();
+  fichero.open(nombreFich.c_str());
   if (fichero.is_open() == false)
   {
     error(ERR_FILE);
@@ -635,6 +668,7 @@ void exportarTodos(const vector<Project> &projects){
     {
       exportarProyecto(projects[i], fichero);
     }
+    fichero.close();
   } 
 }
 
@@ -657,33 +691,7 @@ void exportProjects(ToDo &ProjectManagement){
   }
 }
 
-void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHechas){
-  int i, j;
-  tareasTotales = 0;
-  tareasHechas = 0;
-
-  for (i = 0; i < (int) lists.size(); i++)
-  {
-    for (j = 0; j < (int) lists[i].tasks.size(); j++)
-    {
-      tareasTotales ++;
-      if (lists[i].tasks[j].isDone == true)
-      {
-        tareasHechas ++;
-      }
-    }
-  }
-}
-
-void pedirNombreFicheroImp(ifstream &fichero){
-  string nombre;
-
-  cout << "Enter filename: ";
-  getline(cin, nombre);
-  fichero.open(nombre.c_str());
-}
-
-bool leerTareaFichero(string linea, Task &tarea){
+bool leerTareaFichero(string linea, Task &tarea){ // capta las variables de la tarea leida del fichero
   char separador, isDone;
   bool verificador = false;
   stringstream bufferear(linea);
@@ -720,12 +728,13 @@ bool leerTareaFichero(string linea, Task &tarea){
 
 void importProjects(ToDo &ProjectManagament){
   ifstream fichero;
-  string linea, name, description;
+  string nombreFich, linea, name, description;
   Project project;
   List list;
   Task task;
 
-  pedirNombreFicheroImp(fichero);
+  nombreFich = pedirNombreFichero();
+  fichero.open(nombreFich.c_str());
   if (fichero.is_open() == false)
   {
     error(ERR_FILE);
@@ -783,6 +792,24 @@ void importProjects(ToDo &ProjectManagament){
   }
 }
 
+void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHechas){  //cuenta las tareas totales y hechas de todas las listas del proyecto
+  int i, j;
+  tareasTotales = 0;
+  tareasHechas = 0;
+
+  for (i = 0; i < (int) lists.size(); i++)
+  {
+    for (j = 0; j < (int) lists[i].tasks.size(); j++)
+    {
+      tareasTotales ++;
+      if (lists[i].tasks[j].isDone == true)
+      {
+        tareasHechas ++;
+      }
+    }
+  }
+}
+
 void summary(const vector<Project> &projects){
   int i, totalTasks, tasksDone;
 
@@ -792,6 +819,132 @@ void summary(const vector<Project> &projects){
     contarTareas(projects[i].lists, totalTasks, tasksDone);
     cout << " [" << tasksDone << "/" << totalTasks << "]" << endl;
   }
+}
+
+void copiarNombreACadenayComprobarFinalDeCadena(string origen, char destino[KMAXNAME]){
+  strncpy(destino, origen.c_str(), KMAXNAME);
+  if (origen.length() > KMAXNAME - 1)
+  {
+    destino[KMAXNAME - 1] = '\0';
+  }
+}
+
+void CopiarDatosEnFicheroBinario(const ToDo &ProjectManagement, ofstream &fichero){
+  int i, j, k;
+  BinToDo toDoB;
+  BinProject project;
+  BinList lista;
+  BinTask tarea;
+
+  copiarNombreACadenayComprobarFinalDeCadena(ProjectManagement.name, toDoB.name);
+  toDoB.numProjects = ProjectManagement.projects.size();
+  fichero.write((const char *) &toDoB, sizeof(toDoB));
+  for (i = 0; i < (int) ProjectManagement.projects.size(); i++)
+  {
+    copiarNombreACadenayComprobarFinalDeCadena(ProjectManagement.projects[i].name, project.name);
+    strncpy(project.description, ProjectManagement.projects[i].description.c_str(), KMAXDESC);
+    if (ProjectManagement.projects[i].description.length() > KMAXDESC - 1)
+    {
+      project.description[KMAXDESC - 1] = '\0';
+    }
+    project.numLists = ProjectManagement.projects[i].lists.size();
+    fichero.write((const char*) &project, sizeof(project));
+    for (j = 0; j < (int) ProjectManagement.projects[i].lists.size(); j++)
+    {
+      copiarNombreACadenayComprobarFinalDeCadena(ProjectManagement.projects[i].lists[j].name, lista.name);
+      lista.numTasks = ProjectManagement.projects[i].lists[j].tasks.size();
+      fichero.write((const char*) &lista, sizeof(lista));
+      for (k = 0; k < (int) ProjectManagement.projects[i].lists[j].tasks.size(); k++)
+      {
+        copiarNombreACadenayComprobarFinalDeCadena(ProjectManagement.projects[i].lists[j].tasks[k].name, tarea.name);
+        tarea.deadline = ProjectManagement.projects[i].lists[j].tasks[k].deadline;
+        tarea.isDone = ProjectManagement.projects[i].lists[j].tasks[k].isDone;
+        tarea.time = ProjectManagement.projects[i].lists[j].tasks[k].time;
+        fichero.write((const char *) &tarea, sizeof(tarea));
+      } 
+    } 
+  }
+}
+
+void saveData(const ToDo &ProjectManagement){
+  ofstream fichero;
+  string nombreFich;
+
+  nombreFich = pedirNombreFichero();
+  fichero.open(nombreFich.c_str(), ios::binary);
+  if (fichero.is_open() == false)
+  {
+    error(ERR_FILE);
+  }
+  else
+  {
+    CopiarDatosEnFicheroBinario(ProjectManagement, fichero);
+    fichero.close();
+  }
+}
+
+void loadData(ToDo &ProjectManagement){
+  unsigned i, j, k;
+  char respuesta;
+  ifstream fichero;
+  string nombreFich;
+  BinToDo toDo;
+  BinProject projectbin;
+  BinList listbin;
+  BinTask taskbin;
+  Project project;
+  List list;
+  Task task;
+
+  nombreFich = pedirNombreFichero();
+  fichero.open(nombreFich.c_str(), ios::binary);
+  if (fichero.is_open() == false)
+  {
+    error(ERR_FILE);
+  }
+  else
+  {
+    do
+    {
+      cout << "Confirm [Y/N]?: ";
+      cin >> respuesta;
+      respuesta = tolower(respuesta);
+    } while (respuesta != 'y' && respuesta != 'n');
+    if (respuesta == 'y')
+    {
+      ProjectManagement.projects.clear();
+      fichero.read((char *) &toDo, sizeof(toDo));
+      ProjectManagement.name = toDo.name;
+      ProjectManagement.nextId = 1;
+      for (i = 0; i < toDo.numProjects; i++)
+      {
+        fichero.read((char *) &projectbin, sizeof(projectbin));
+        project.name = projectbin.name;
+        project.description = projectbin.description;
+        project.id = ProjectManagement.nextId;
+        ProjectManagement.nextId ++;
+        for (j = 0; j < projectbin.numLists; j++)
+        {
+          fichero.read((char *) &listbin, sizeof(listbin));
+          list.name = listbin.name;
+          for (k = 0; k < listbin.numTasks; k++)
+          {
+            fichero.read((char *) &taskbin, sizeof(taskbin));
+            task.name = taskbin.name;
+            task.deadline = taskbin.deadline;
+            task.isDone = taskbin.isDone;
+            task.time = taskbin.time;
+            list.tasks.push_back(task);
+          }
+          project.lists.push_back(list);
+          list.tasks.clear();
+        }
+        ProjectManagement.projects.push_back(project);
+        project.lists.clear();
+      } 
+    }
+    fichero.close(); 
+  }  
 }
 
 void showMainMenu(){
@@ -829,9 +982,9 @@ int main(){
                 break;
       case '5': exportProjects(ProjectManagement);
                 break;
-      case '6': 
+      case '6': loadData(ProjectManagement);
                 break;
-      case '7': 
+      case '7': saveData(ProjectManagement);
                 break;
       case '8': summary(ProjectManagement.projects);
                 break;
