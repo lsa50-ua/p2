@@ -691,7 +691,7 @@ void exportProjects(ToDo &ProjectManagement){
   }
 }
 
-bool leerTareaFichero(string linea, Task &tarea){ // capta las variables de la tarea leida del fichero
+bool leerTareaFichero(string linea, Task &tarea, int projectRep){ // capta las variables de la tarea leida del fichero
   char separador, isDone;
   bool verificador = false;
   stringstream bufferear(linea);
@@ -708,13 +708,13 @@ bool leerTareaFichero(string linea, Task &tarea){ // capta las variables de la t
   {
     tarea.isDone = false;
   }
-  if (ComprobarFecha(tarea.deadline) == false)
+  if (ComprobarFecha(tarea.deadline) == false && projectRep == -1)
   {
     error(ERR_DATE);
   }
   else
   {
-    if (tarea.time < MINEXPECTEDTIME || tarea.time > MAXEXPECTEDTIME)
+    if ((tarea.time < MINEXPECTEDTIME || tarea.time > MAXEXPECTEDTIME) && projectRep == -1)
     {
       error(ERR_TIME);
     }
@@ -726,18 +726,28 @@ bool leerTareaFichero(string linea, Task &tarea){ // capta las variables de la t
   return verificador;
 }
 
-void importProjects(ToDo &ProjectManagament){
+void importProjects(ToDo &ProjectManagament, string nombreFich, bool &abierto){
   ifstream fichero;
-  string nombreFich, linea, name, description;
+  string linea, name, description;
   Project project;
   List list;
   Task task;
+  int projectRep;
+  abierto = true;
 
-  nombreFich = pedirNombreFichero();
-  fichero.open(nombreFich.c_str());
+  if (nombreFich != "")
+  {
+    fichero.open(nombreFich.c_str());
+  }
+  else
+  {
+    nombreFich = pedirNombreFichero();
+    fichero.open(nombreFich.c_str());
+  }
   if (fichero.is_open() == false)
   {
     error(ERR_FILE);
+    abierto = false;
   }
   else
   {
@@ -745,6 +755,11 @@ void importProjects(ToDo &ProjectManagament){
       project.lists.clear();
       getline(fichero, name);
       name.erase(name.begin());
+      projectRep = ComprobarNombreProyecto(ProjectManagament.projects, name);
+      if (projectRep != -1)
+      {
+        error(ERR_PROJECT_NAME);
+      }
       getline(fichero, linea);
       if(linea[0] == '*')
       {
@@ -766,7 +781,7 @@ void importProjects(ToDo &ProjectManagament){
           getline(fichero, linea);
           while (linea[0] != '>' && linea[0] != '@')
           {
-            if(leerTareaFichero(linea, task) == true)
+            if(leerTareaFichero(linea, task, projectRep) == true)
             {
               list.tasks.push_back(task);
             }
@@ -775,11 +790,7 @@ void importProjects(ToDo &ProjectManagament){
           project.lists.push_back(list);
         } 
       }
-      if (ComprobarNombreProyecto(ProjectManagament.projects, name) != -1)
-      {
-        error(ERR_PROJECT_NAME);
-      }
-      else
+      if (projectRep == -1)
       {
         project.name = name;
         project.description = description;
@@ -883,11 +894,8 @@ void saveData(const ToDo &ProjectManagement){
   }
 }
 
-void loadData(ToDo &ProjectManagement){
+void cargarFicheroBinario(ToDo &ProjectManagement, ifstream &fichero){
   unsigned i, j, k;
-  char respuesta;
-  ifstream fichero;
-  string nombreFich;
   BinToDo toDo;
   BinProject projectbin;
   BinList listbin;
@@ -896,55 +904,79 @@ void loadData(ToDo &ProjectManagement){
   List list;
   Task task;
 
-  nombreFich = pedirNombreFichero();
-  fichero.open(nombreFich.c_str(), ios::binary);
-  if (fichero.is_open() == false)
+  ProjectManagement.projects.clear();
+  fichero.read((char *) &toDo, sizeof(toDo));
+  ProjectManagement.name = toDo.name;
+  ProjectManagement.nextId = 1;
+  for (i = 0; i < toDo.numProjects; i++)
   {
-    error(ERR_FILE);
+    fichero.read((char *) &projectbin, sizeof(projectbin));
+    project.name = projectbin.name;
+    project.description = projectbin.description;
+    project.id = ProjectManagement.nextId;
+    ProjectManagement.nextId ++;
+    for (j = 0; j < projectbin.numLists; j++)
+    {
+      fichero.read((char *) &listbin, sizeof(listbin));
+      list.name = listbin.name;
+      for (k = 0; k < listbin.numTasks; k++)
+      {
+        fichero.read((char *) &taskbin, sizeof(taskbin));
+        task.name = taskbin.name;
+        task.deadline = taskbin.deadline;
+        task.isDone = taskbin.isDone;
+        task.time = taskbin.time;
+        list.tasks.push_back(task);
+      }
+      project.lists.push_back(list);
+      list.tasks.clear();
+    }
+    ProjectManagement.projects.push_back(project);
+    project.lists.clear();
+  } 
+}
+
+void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){
+  char respuesta;
+  ifstream fichero;
+  string nombreFich;
+  abierto = true;
+  
+  if (nombreFichAux != "")
+  {
+    fichero.open(nombreFich.c_str(), ios::binary);
   }
   else
   {
-    do
+    nombreFich = pedirNombreFichero();
+    fichero.open(nombreFich.c_str(), ios::binary);
+  }
+  if (fichero.is_open() == false)
+  {
+    error(ERR_FILE);
+    abierto = false;
+  }
+  else
+  {
+    if (nombreFichAux == "")
     {
-      cout << "Confirm [Y/N]?: ";
-      cin >> respuesta;
-      respuesta = tolower(respuesta);
-    } while (respuesta != 'y' && respuesta != 'n');
+      do
+      {
+        cout << "Confirm [Y/N]?: ";
+        cin >> respuesta;
+        respuesta = tolower(respuesta);
+      } while (respuesta != 'y' && respuesta != 'n');
+    }
+    else
+    {
+      respuesta = 'y';
+    }
     if (respuesta == 'y')
     {
-      ProjectManagement.projects.clear();
-      fichero.read((char *) &toDo, sizeof(toDo));
-      ProjectManagement.name = toDo.name;
-      ProjectManagement.nextId = 1;
-      for (i = 0; i < toDo.numProjects; i++)
-      {
-        fichero.read((char *) &projectbin, sizeof(projectbin));
-        project.name = projectbin.name;
-        project.description = projectbin.description;
-        project.id = ProjectManagement.nextId;
-        ProjectManagement.nextId ++;
-        for (j = 0; j < projectbin.numLists; j++)
-        {
-          fichero.read((char *) &listbin, sizeof(listbin));
-          list.name = listbin.name;
-          for (k = 0; k < listbin.numTasks; k++)
-          {
-            fichero.read((char *) &taskbin, sizeof(taskbin));
-            task.name = taskbin.name;
-            task.deadline = taskbin.deadline;
-            task.isDone = taskbin.isDone;
-            task.time = taskbin.time;
-            list.tasks.push_back(task);
-          }
-          project.lists.push_back(list);
-          list.tasks.clear();
-        }
-        ProjectManagement.projects.push_back(project);
-        project.lists.clear();
-      } 
-    }
+      cargarFicheroBinario(ProjectManagement, fichero);
+    }  
     fichero.close(); 
-  }  
+  }
 }
 
 void showMainMenu(){
@@ -960,39 +992,118 @@ void showMainMenu(){
        << "Option: ";
 }
 
-int main(){
+bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &namefich_bin){
+  bool comprobar = true;
+  int i, contador_arg_l, contador_arg_i;
+  namefich_text = "";
+  namefich_bin = ""; 
+  contador_arg_l = 0;
+  contador_arg_i = 0;
+
+  for (i = 1; i < argc && comprobar == true; i++)
+  {
+    if(strcmp(argv[i], "-l") == 0)
+    {
+      if ((i + 1) >= argc)
+      {
+        comprobar = false;
+      }
+      else
+      {
+        namefich_bin == argv[i + 1];
+        i++;
+        contador_arg_l ++;
+      } 
+    }
+    else
+    {
+      if (strcmp(argv[i], "-i") == 0 && contador_arg_i == 0)
+      {
+        if ((i + 1) >= argc)
+        {
+          comprobar = false;
+        }
+        else
+        {
+          namefich_text = argv[i + 1];
+          i++;
+          contador_arg_i ++;
+        }
+      }
+      else
+      {
+        comprobar = false;
+      }
+    }
+    if (contador_arg_l > 1 || contador_arg_i > 1)
+    {
+      comprobar = false;
+    } 
+  }
+  return comprobar;
+}
+
+int main(int argc, char *argv[]){
   ToDo ProjectManagement;
   ProjectManagement.name = "My ToDo list";
   ProjectManagement.nextId = 1;
+  string namefich_txt, namefich_bin;
+  bool comprobacion, isOpen;
   char option;
+  isOpen = true;
   
-  do{
-    showMainMenu();
-    cin >> option;
-    cin.get();
-    
-    switch(option){
-      case '1': ProjectMenu(ProjectManagement);
-                break;
-      case '2': addProject(ProjectManagement);
-                break;
-      case '3': deleteProject(ProjectManagement);
-                break;
-      case '4': importProjects(ProjectManagement);
-                break;
-      case '5': exportProjects(ProjectManagement);
-                break;
-      case '6': loadData(ProjectManagement);
-                break;
-      case '7': saveData(ProjectManagement);
-                break;
-      case '8': summary(ProjectManagement.projects);
-                break;
-      case 'q': break;
-      default: error(ERR_OPTION);
+  comprobacion = comprobarArgumentos(argc, argv, namefich_txt, namefich_bin);
+  if (comprobacion == false)
+  {
+    error(ERR_ARGS);
+  }
+  else
+  {
+    if (namefich_bin != "")
+    {
+      loadData(ProjectManagement, namefich_bin, isOpen);
     }
-  }while(option!='q');
-  
+    if (isOpen == true)
+    {
+      if (namefich_txt != "")
+      {
+        importProjects(ProjectManagement, namefich_txt, isOpen);
+      }
+    }
+    if (isOpen == false)
+    {
+      error(ERR_FILE);
+    }
+    else
+    {
+      do{
+        showMainMenu();
+        cin >> option;
+        cin.get();
+        
+        switch(option){
+          case '1': ProjectMenu(ProjectManagement);
+                    break;
+          case '2': addProject(ProjectManagement);
+                    break;
+          case '3': deleteProject(ProjectManagement);
+                    break;
+          case '4': importProjects(ProjectManagement, "", isOpen);
+                    break;
+          case '5': exportProjects(ProjectManagement);
+                    break;
+          case '6': loadData(ProjectManagement, "", isOpen);
+                    break;
+          case '7': saveData(ProjectManagement);
+                    break;
+          case '8': summary(ProjectManagement.projects);
+                    break;
+          case 'q': break;
+          default: error(ERR_OPTION);
+        }
+      }while(option!='q');
+    }
+  }
   return 0;    
 }
 
