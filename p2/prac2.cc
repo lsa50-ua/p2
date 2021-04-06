@@ -733,11 +733,13 @@ void importProjects(ToDo &ProjectManagament, string nombreFich, bool &abierto){
   List list;
   Task task;
   int projectRep;
+  bool outMainMenu = false;
   abierto = true;
 
   if (nombreFich != "")
   {
     fichero.open(nombreFich.c_str());
+    outMainMenu = true;
   }
   else
   {
@@ -746,7 +748,10 @@ void importProjects(ToDo &ProjectManagament, string nombreFich, bool &abierto){
   }
   if (fichero.is_open() == false)
   {
-    error(ERR_FILE);
+    if (outMainMenu == false)
+    {
+      error(ERR_FILE);
+    }
     abierto = false;
   }
   else
@@ -940,11 +945,13 @@ void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){
   char respuesta;
   ifstream fichero;
   string nombreFich;
+  bool outMainMenu = false;
   abierto = true;
   
   if (nombreFichAux != "")
   {
-    fichero.open(nombreFich.c_str(), ios::binary);
+    fichero.open(nombreFichAux.c_str(), ios::binary);
+    outMainMenu = true;
   }
   else
   {
@@ -953,7 +960,10 @@ void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){
   }
   if (fichero.is_open() == false)
   {
-    error(ERR_FILE);
+    if (outMainMenu == false)
+    {
+      error(ERR_FILE);
+    }
     abierto = false;
   }
   else
@@ -1002,7 +1012,7 @@ bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &
 
   for (i = 1; i < argc && comprobar == true; i++)
   {
-    if(strcmp(argv[i], "-l") == 0)
+    if(strcmp(argv[i], "-l") == 0 && contador_arg_l == 0)
     {
       if ((i + 1) >= argc)
       {
@@ -1010,7 +1020,7 @@ bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &
       }
       else
       {
-        namefich_bin == argv[i + 1];
+        namefich_bin = argv[i + 1];
         i++;
         contador_arg_l ++;
       } 
@@ -1035,10 +1045,6 @@ bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &
         comprobar = false;
       }
     }
-    if (contador_arg_l > 1 || contador_arg_i > 1)
-    {
-      comprobar = false;
-    } 
   }
   return comprobar;
 }
