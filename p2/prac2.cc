@@ -20,6 +20,12 @@ const int BORRAR = 1;
 const int TOGGLE = 2;
 const int KMAXNAME = 20;
 const int KMAXDESC = 40;
+const string ASKPROJECTNAME = "Enter project name: ";
+const string ASKPROJECTDESC = "Enter project description: ";
+const string ASKLISTNAME = "Enter list name: ";
+const string ASKTASKNAME = "Enter task name: ";
+const string ASKPROJECTID = "Enter project id: ";
+const string ASKFILENAME = "Enter filename: ";
 
 struct Date{
   int day;
@@ -132,12 +138,12 @@ void ComprobarCadenaVacia(string name){
 void editProject(Project &toDoList){
   do
   {
-    cout << "Enter project name: ";
+    cout << ASKPROJECTNAME;
     getline(cin, toDoList.name);
     ComprobarCadenaVacia(toDoList.name);   
   } while (toDoList.name == "");
   
-  cout << "Enter project description: ";
+  cout << ASKPROJECTDESC;
   getline(cin, toDoList.description);
 }
 
@@ -158,7 +164,7 @@ int ComprobarNombresListas(Project toDoList, string nombre){
 void IntroducirNombreLista(string &nombre){
   do
   {  
-    cout << "Enter list name: ";
+    cout << ASKLISTNAME;
     getline(cin, nombre);
     ComprobarCadenaVacia(nombre);
   } while (nombre == "");
@@ -239,7 +245,7 @@ void addTask(Project &toDoList){
   }
   else
   {
-    cout << "Enter task name: ";
+    cout << ASKTASKNAME;
     getline(cin, newtask.name);
     cout << "Enter deadline: ";
     cin >> newtask.deadline.day >> simbolo >> newtask.deadline.month >> simbolo >> newtask.deadline.year;
@@ -314,7 +320,7 @@ void deleteTask(Project &toDoList){
     error(ERR_LIST_NAME);
   }
   else{
-    cout << "Enter task name: ";
+    cout << ASKTASKNAME;
     getline(cin, taskname);
     ComprobarYHacerFuncionTask(toDoList, taskname, comprobacionLista, BORRAR);
   }
@@ -332,7 +338,7 @@ void toggleTask(Project &toDoList){
   }
   else
   {
-    cout << "Enter task name: ";
+    cout << ASKTASKNAME;
     getline(cin, taskname);
     ComprobarYHacerFuncionTask(toDoList, taskname, ComprobacionLista, TOGGLE);
   }
@@ -465,7 +471,7 @@ int PedirYComprobarId(const vector<Project> &projects){
   int id, pos, i;
   pos = -1;
 
-  cout << "Enter project id: ";
+  cout << ASKPROJECTID;
   cin >> id;
   cin.get();
   for (i = 0; i < (int) projects.size() && pos == -1; i++)
@@ -535,7 +541,7 @@ void addProject(ToDo &ProjectManagement){
 
   do
   {
-    cout << "Enter project name: ";
+    cout << ASKPROJECTNAME;
     getline(cin, nuevo.name);
     ComprobarCadenaVacia(nuevo.name);   
   } while (nuevo.name == "");
@@ -546,7 +552,7 @@ void addProject(ToDo &ProjectManagement){
   }
   else
   {
-    cout << "Enter project description: ";
+    cout << ASKPROJECTDESC;
     getline(cin, nuevo.description);
     nuevo.id = ProjectManagement.nextId;
     ProjectManagement.projects.push_back(nuevo);
@@ -619,7 +625,7 @@ void exportarProyecto(Project proyecto, ofstream &fichero){ // funcion que escri
 string pedirNombreFichero(){
   string nombre;
 
-  cout << "Enter filename: ";
+  cout << ASKFILENAME;
   getline(cin, nombre);
   
   return nombre;
