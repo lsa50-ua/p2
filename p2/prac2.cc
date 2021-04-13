@@ -1055,6 +1055,24 @@ bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &
   return comprobar;
 }
 
+bool iniciarArgumentos(ToDo &ProjectManagement, string namefich_txt, string namefich_bin){
+  bool isOpen = true;
+
+  if (namefich_bin != "")
+  {
+    loadData(ProjectManagement, namefich_bin, isOpen);
+  }
+  if (isOpen == true && namefich_txt != "")
+  {
+    importProjects(ProjectManagement, namefich_txt, isOpen);
+  }
+  if (isOpen == false)
+  {
+    error(ERR_FILE);
+  }
+  return isOpen;
+}
+
 int main(int argc, char *argv[]){
   ToDo ProjectManagement;
   ProjectManagement.name = "My ToDo list";
@@ -1071,22 +1089,7 @@ int main(int argc, char *argv[]){
   }
   else
   {
-    if (namefich_bin != "")
-    {
-      loadData(ProjectManagement, namefich_bin, isOpen);
-    }
-    if (isOpen == true)
-    {
-      if (namefich_txt != "")
-      {
-        importProjects(ProjectManagement, namefich_txt, isOpen);
-      }
-    }
-    if (isOpen == false)
-    {
-      error(ERR_FILE);
-    }
-    else
+    if (iniciarArgumentos(ProjectManagement, namefich_txt, namefich_bin) == true)
     {
       do{
         showMainMenu();
