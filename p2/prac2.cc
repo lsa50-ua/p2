@@ -455,7 +455,7 @@ void report(const Project &toDoList){
   InformacionListas(toDoList);
 }
 
-void showProjectMenu(){
+void showProjectMenu(){ // complementa a ProjectMenu para imprimir por pantalla las opciones del menu
   cout << "1- Edit project" << endl
        << "2- Add list" << endl
        << "3- Delete list" << endl 
@@ -467,7 +467,7 @@ void showProjectMenu(){
        << "Option: ";
 }
 
-int PedirYComprobarId(const vector<Project> &projects){
+int PedirYComprobarId(const vector<Project> &projects){ // pide un id y devuelve la posicion donde se encuentra en el vector, en el caso que no encuentre devulve -1
   int id, pos, i;
   pos = -1;
 
@@ -484,7 +484,7 @@ int PedirYComprobarId(const vector<Project> &projects){
   return pos;
 }
 
-void ProjectMenu(ToDo &ProjectManagement){
+void ProjectMenu(ToDo &ProjectManagement){  // funcion que entra en un menu con varias opciones para modificar el proyecto seleccionado mediante el id
   char option;
   int pos;
 
@@ -522,7 +522,7 @@ void ProjectMenu(ToDo &ProjectManagement){
   } 
 }
 
-int ComprobarNombreProyecto(const vector<Project> &projects, string name){
+int ComprobarNombreProyecto(const vector<Project> &projects, string name){  // funcion que busca si hay un nombre igual en el vector de proyectos y devuelve la posicion donde se encuentra el proyecto en el vector en caso contrario devuelve -1
   int i, pos;
 
   pos = -1;
@@ -536,7 +536,7 @@ int ComprobarNombreProyecto(const vector<Project> &projects, string name){
   return pos;
 }
 
-void addProject(ToDo &ProjectManagement){
+void addProject(ToDo &ProjectManagement){ // crea un proyecto en el que se piden para introducirle nombre, descripcion y se le asigna un id y este se almacena en el vector de proyectos
   Project nuevo;
 
   do
@@ -560,7 +560,7 @@ void addProject(ToDo &ProjectManagement){
   }
 }
 
-void deleteProject(ToDo &ProjectManagement){
+void deleteProject(ToDo &ProjectManagement){  // elimina el proyecto que tenga el id introducido por pantalla
   int pos;
   pos = PedirYComprobarId(ProjectManagement.projects);
 
@@ -574,7 +574,7 @@ void deleteProject(ToDo &ProjectManagement){
   } 
 }
 
-char imprimirIsDone(bool hecho){  
+char imprimirIsDone(bool hecho){  // devuelve un caracter en funcion del valor de la variable booleana
   char estado;
 
   if (hecho == true)
@@ -600,7 +600,7 @@ void exportarTareas(Task tareas, ofstream &fichero){  // funcion que complementa
   fichero << "|" << tareas.time << endl;
 }
 
-void exportarProyecto(Project proyecto, ofstream &fichero){ // funcion que escribe el proyecto seleccionado en el formato pedido a fichero
+void exportarProyecto(Project proyecto, ofstream &fichero){ // funcion que complementa a exportOne y exportarTodos, que escribe en un fichero de texto el proyecto introducido como parametro
   int i, j;
   i = 0;
   j = 0;
@@ -622,7 +622,7 @@ void exportarProyecto(Project proyecto, ofstream &fichero){ // funcion que escri
   fichero << ">" << endl;  
 }
 
-string pedirNombreFichero(){
+string pedirNombreFichero(){  // pregunta el nombre del fichero y devuelve el valor obtenido
   string nombre;
 
   cout << ASKFILENAME;
@@ -678,7 +678,7 @@ void exportarTodos(const vector<Project> &projects){  // funcion que exporta tod
   } 
 }
 
-void exportProjects(ToDo &ProjectManagement){
+void exportProjects(ToDo &ProjectManagement){ // funcion que en funcion de la respuesta obtenida emplea la funcion exportOne o exportTodos
   char respuesta;
   
   do
@@ -697,7 +697,7 @@ void exportProjects(ToDo &ProjectManagement){
   }
 }
 
-bool leerTareaFichero(string linea, Task &tarea, int projectRep){ // capta las variables de la tarea leida del fichero
+bool leerTareaFichero(string linea, Task &tarea, int projectRep){ // complementa la funcion importProjects, capta las variables de la tarea leida del fichero
   char separador, isDone;
   bool verificador = false;
   stringstream bufferear(linea);
@@ -732,7 +732,7 @@ bool leerTareaFichero(string linea, Task &tarea, int projectRep){ // capta las v
   return verificador;
 }
 
-void importProjects(ToDo &ProjectManagament, string nombreFich, bool &abierto){
+void importProjects(ToDo &ProjectManagament, string nombreFich, bool &abierto){ // lee el fichero de texto seleccionado recorriendo linea por linea y almacenando los datos en el programa
   ifstream fichero;
   string linea, name, description;
   Project project;
@@ -832,7 +832,7 @@ void contarTareas(const vector<List> &lists, int &tareasTotales, int &tareasHech
   }
 }
 
-void summary(const vector<Project> &projects){
+void summary(const vector<Project> &projects){  // recorre todos los proyectos de la estructura e imprime por pantalla de cada proyecto el id, el nombre las tareas hechas y las totales
   int i, totalTasks, tasksDone;
 
   for (i = 0; i < (int) projects.size(); i++)
@@ -845,13 +845,13 @@ void summary(const vector<Project> &projects){
 
 void copiarNombreACadenayComprobarFinalDeCadena(string origen, char destino[KMAXNAME]){
   strncpy(destino, origen.c_str(), KMAXNAME);
-  if (origen.length() > KMAXNAME - 1)
+  if (origen.length() > KMAXNAME - 1)   // coloca el fin de cadena ('\0') en las cadenas de caracteres de mas tamaño que limita la constante
   {
     destino[KMAXNAME - 1] = '\0';
   }
 }
 
-void CopiarDatosEnFicheroBinario(const ToDo &ProjectManagement, ofstream &fichero){
+void CopiarDatosEnFicheroBinario(const ToDo &ProjectManagement, ofstream &fichero){ // complementa al saveData para almacenar los datos en la estructura binaria y rellenar el fichero binario con estos datos
   int i, j, k;
   BinToDo toDoB;
   BinProject project;
@@ -888,7 +888,7 @@ void CopiarDatosEnFicheroBinario(const ToDo &ProjectManagement, ofstream &ficher
   }
 }
 
-void saveData(const ToDo &ProjectManagement){
+void saveData(const ToDo &ProjectManagement){ // guarda en un fichero binario los datos del programa
   ofstream fichero;
   string nombreFich;
 
@@ -947,7 +947,7 @@ void cargarFicheroBinario(ToDo &ProjectManagement, ifstream &fichero){  // funci
   } 
 }
 
-void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){  // carga el fichero binario en el programa
+void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){  // carga en el programa el fichero introducido
   char respuesta;
   ifstream fichero;
   string nombreFich;
