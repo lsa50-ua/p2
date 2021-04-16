@@ -905,7 +905,7 @@ void saveData(const ToDo &ProjectManagement){
   }
 }
 
-void cargarFicheroBinario(ToDo &ProjectManagement, ifstream &fichero){
+void cargarFicheroBinario(ToDo &ProjectManagement, ifstream &fichero){  // funcion que complementa al loadData, que lee el contenido del fichero y carga en el programa los datos leidos
   unsigned i, j, k;
   BinToDo toDo;
   BinProject projectbin;
@@ -947,7 +947,7 @@ void cargarFicheroBinario(ToDo &ProjectManagement, ifstream &fichero){
   } 
 }
 
-void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){
+void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){  // carga el fichero binario en el programa
   char respuesta;
   ifstream fichero;
   string nombreFich;
@@ -995,7 +995,7 @@ void loadData(ToDo &ProjectManagement, string nombreFichAux, bool &abierto){
   }
 }
 
-void showMainMenu(){
+void showMainMenu(){  // muestra en la salida el menu principal
   cout << "1- Project menu" << endl
        << "2- Add project" << endl
        << "3- Delete project" << endl 
@@ -1008,7 +1008,7 @@ void showMainMenu(){
        << "Option: ";
 }
 
-bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &namefich_bin){
+bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &namefich_bin){  // comprueba que los argumentos introducidos son correctos
   bool comprobar = true;
   int i, contador_arg_l, contador_arg_i;
   namefich_text = "";
@@ -1055,7 +1055,7 @@ bool comprobarArgumentos(int argc, char *argv[], string &namefich_text, string &
   return comprobar;
 }
 
-bool iniciarArgumentos(ToDo &ProjectManagement, string namefich_txt, string namefich_bin){
+bool iniciarArgumentos(ToDo &ProjectManagement, string namefich_txt, string namefich_bin){  // inicializa los argumentos y comprueba fallos al cargarlos
   bool isOpen = true;
 
   if (namefich_bin != "")
