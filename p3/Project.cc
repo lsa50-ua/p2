@@ -4,7 +4,7 @@
 using namespace std;
 
 
-Project::Project(string name, string description = ""){
+Project::Project(string name, string description){
     if (name != "")
     {
         this -> name = name;
@@ -79,7 +79,7 @@ void Project::setDescription(string description){
     this -> description = description;
 }
 
-void Project::edit(string name = "", string description = ""){
+void Project::edit(string name, string description){
     if (name == "")
     {
         do
@@ -104,7 +104,7 @@ void Project::edit(string name = "", string description = ""){
 
 }
 
-void Project::addList(string name = ""){
+void Project::addList(string name){
 
     if (name == "")
     {
@@ -131,7 +131,7 @@ void Project::addList(string name = ""){
     }    
 }
 
-void Project::deleteList(string name = ""){
+void Project::deleteList(string name){
     int posicion;
 
     if (name == "")
@@ -159,7 +159,7 @@ void Project::deleteList(string name = ""){
     }
 }
 
-void Project::addTaskToList(string name = ""){
+void Project::addTaskToList(string name){
     string taskname, deadline;
     bool fechacomprobada, tiempocomprobado;
     int comprobacionName, time;
@@ -204,7 +204,7 @@ void Project::addTaskToList(string name = ""){
     }
 }
 
-void Project::deleteTaskFromList(string name = ""){
+void Project::deleteTaskFromList(string name){
     string taskname;
     int comprobacionLista;
   
@@ -234,7 +234,7 @@ void Project::deleteTaskFromList(string name = ""){
     }
 }
 
-void Project::toggleTaskFromList(string name = ""){
+void Project::toggleTaskFromList(string name){
     string taskname;
     int comprobacionLista;
   
@@ -293,7 +293,7 @@ void Project::menu(){
                     break;
             case '6': toggleTaskFromList();
                     break;
-            case '7': ;
+            case '7': cout << *this << endl;
                     break;
             case 'b': break;
             default: Util::error(ERR_OPTION);
@@ -320,10 +320,13 @@ ostream &operator<<(ostream &os, const Project &p){
     int posi, posj, vecesPendientes, vecesHechas, totalLeft, totalDone, conteo;
     vector <Task> tareas;
     Date deadline, hpriorityFecha;
+    conteo = 0;
     totalLeft = 0;
     totalDone = 0;
     vecesHechas = 0;
     vecesPendientes = 0;
+    posi = -1;
+    posj = -1;
 
     os << "Name: " << p.name << endl;
     if (p.description != "")
@@ -332,13 +335,13 @@ ostream &operator<<(ostream &os, const Project &p){
     }
     for (unsigned i = 0; i < p.lists.size(); i++)
     {
-        os << p.lists[i] << endl;
-        totalLeft = totalLeft + p.lists[i].getTimeTasks();
+        os << p.lists[i];
+        totalLeft = totalLeft + p.lists[i].getTimeTasks() - p.lists[i].getTimeDone();
         totalDone = totalDone + p.lists[i].getTimeDone();
         vecesHechas = vecesHechas + p.lists[i].getNumDone();
-        vecesPendientes = vecesPendientes + p.lists[i].getNumTasks();
+        vecesPendientes = vecesPendientes + p.lists[i].getNumTasks() - p.lists[i].getNumDone();
         tareas = p.lists[i].getTasks();
-        for (unsigned j = 0; i < tareas.size(); i++)
+        for (unsigned j = 0; j < tareas.size(); j++)
         {   
             if (tareas[j].getIsDone() == false)
             {
@@ -399,12 +402,12 @@ ostream &operator<<(ostream &os, const Project &p){
     
     os << "Total left: " << vecesPendientes << " (" << totalLeft << " minutes)" << endl;
     os << "Total done: " << vecesHechas << " (" << totalDone << " minutes)" << endl;
-    if (vecesPendientes > 0)
+    if (conteo > 0)
     {
         tareas = p.lists[posi].getTasks();
         os << "Highest priority: " << tareas[posj].getName();
         os << " (" << hpriorityFecha.year << "-" << hpriorityFecha.month;
-        os << "-" << hpriorityFecha.day << ")" << endl;
+        os << "-" << hpriorityFecha.day << ")";
     }
     return os;
 }

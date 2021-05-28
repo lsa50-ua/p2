@@ -15,6 +15,7 @@ class Project{
         string description;
         int getPosList(string name) const;
         vector<List> lists;
+        bool esMenor(const Date &date1, const Date &date2) const;
     public:
         Project(string name, string description = "");
         int getId() const;

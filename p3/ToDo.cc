@@ -70,7 +70,7 @@ void ToDo::addProject(Project *project){
     }
 }
 
-void ToDo::deleteProject(int id = 0){
+void ToDo::deleteProject(int id){
 
     if (id == 0)
     {
@@ -88,9 +88,46 @@ void ToDo::deleteProject(int id = 0){
 }
 
 void ToDo::setProjectDescription(string name, string description){
-
+    int pos;
+    pos = getPosProject(name);
+    if (pos == -1)
+    {
+        Util::error(ERR_PROJECT_NAME);
+    }
+    else
+    {
+        projects[pos]->setDescription(description);
+    }
+    
+    
 }
 
-void ToDo::projectMenu(int id = 0){
+void ToDo::projectMenu(int id){
+    int pos;
 
+    if (id == 0)
+    {
+        cout << "Enter project id: ";
+        cin >> id;
+    }
+
+    pos = getPosProject(id);
+    if (pos == -1)
+    {
+        Util::error(ERR_ID);
+    }
+    else
+    {
+        projects[pos]->menu();
+    }
+    
+}
+
+ostream &operator<<(ostream &os, const ToDo &t){
+    for (unsigned i = 0; i < t.projects.size(); i++)
+    {   
+        os << t.projects[i]->summary() << endl;
+    }
+    
+    return os;
 }

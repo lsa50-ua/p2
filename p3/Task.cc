@@ -4,6 +4,7 @@
 
 Task::Task(string name){
     this->name = name;
+    time = 1;
     deadline.day = 1;
     deadline.month = 1;
     deadline.year = 2000;
